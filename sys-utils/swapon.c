@@ -44,6 +44,8 @@
 # define SWAP_FLAG_DISCARD_PAGES 0x40000 /* discard page-clusters after use */
 #endif
 
+#define SWAP_FLAG_PRIVATE 0x1000000
+
 #define SWAP_FLAGS_DISCARD_VALID (SWAP_FLAG_DISCARD | SWAP_FLAG_DISCARD_ONCE | \
 				  SWAP_FLAG_DISCARD_PAGES)
 
@@ -711,6 +713,9 @@ static int parse_options(struct swap_prop *props, const char *options)
 			/* do discard for every released swap page */
 			if (strncmp(arg, "pages", argsz) == 0)
 				props->discard |= SWAP_FLAG_DISCARD_PAGES;
+
+			if(strncmp(arg,"private",argsz) == 0)
+				props->discard |= SWAP_FLAG_PRIVATE;
 		}
 	}
 
