@@ -47,7 +47,7 @@
 #define SWAP_FLAG_PRIVATE 0x1000000
 
 #define SWAP_FLAGS_DISCARD_VALID (SWAP_FLAG_DISCARD | SWAP_FLAG_DISCARD_ONCE | \
-				  SWAP_FLAG_DISCARD_PAGES | SWAP_FLAG_PRIVATE)
+				  SWAP_FLAG_DISCARD_PAGES)
 
 #ifndef SWAP_FLAG_PREFER
 # define SWAP_FLAG_PREFER	0x8000	/* set if swap priority specified */
@@ -110,6 +110,7 @@ struct swap_prop {
 	int discard;			/* discard policy */
 	int priority;			/* non-prioritized swap by default */
 	int no_fail;			/* skip device if not exist */
+	int private;
 };
 
 /* device description */
@@ -668,7 +669,7 @@ static int do_swapon(const struct swapon_ctl *ctl,
 			flags |= prop->discard;
 	}
 
-	if (prop->discard & SWAP_FLAG_PRIVATE)
+	if (prop->private)
 		flags |= SWAP_FLAG_PRIVATE;
 
 	if (ctl->verbose)
@@ -702,6 +703,9 @@ static int parse_options(struct swap_prop *props, const char *options)
 	assert(props);
 	assert(options);
 
+	if (mnt_optstr_get_option(options, "private", NULL, NULL) == 0)
+		props->private = 1;
+
 	if (mnt_optstr_get_option(options, "nofail", NULL, NULL) == 0)
 		props->no_fail = 1;
 
@@ -716,9 +720,6 @@ static int parse_options(struct swap_prop *props, const char *options)
 			/* do discard for every released swap page */
 			if (strncmp(arg, "pages", argsz) == 0)
 				props->discard |= SWAP_FLAG_DISCARD_PAGES;
-
-			if(strncmp(arg,"private",argsz) == 0)
-				props->discard |= SWAP_FLAG_PRIVATE;
 		}
 	}
 
@@ -931,14 +932,15 @@ int main(int argc, char *argv[])
 					ctl.props.discard |= SWAP_FLAG_DISCARD_ONCE;
 				else if (strcmp(optarg, "pages") == 0)
 					ctl.props.discard |= SWAP_FLAG_DISCARD_PAGES;
-				else if (strcmp(optarg, "private") == 0)
-					ctl.props.discard |= SWAP_FLAG_PRIVATE;
 				else
 					errx(EXIT_FAILURE, _("unsupported discard policy: %s"), optarg);
 			}
 			break;
 		case 'e':               /* ifexists */
 			ctl.props.no_fail = 1;
+			break;
+		case 'w':
+			ctl.props.private = 1;
 			break;
 		case 'f':
 			ctl.fix_page_size = 1;
