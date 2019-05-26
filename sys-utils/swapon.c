@@ -47,7 +47,7 @@
 #define SWAP_FLAG_PRIVATE 0x1000000
 
 #define SWAP_FLAGS_DISCARD_VALID (SWAP_FLAG_DISCARD | SWAP_FLAG_DISCARD_ONCE | \
-				  SWAP_FLAG_DISCARD_PAGES)
+				  SWAP_FLAG_DISCARD_PAGES | SWAP_FLAG_PRIVATE)
 
 #ifndef SWAP_FLAG_PREFER
 # define SWAP_FLAG_PREFER	0x8000	/* set if swap priority specified */
@@ -668,6 +668,9 @@ static int do_swapon(const struct swapon_ctl *ctl,
 			flags |= prop->discard;
 	}
 
+	if (prop->discard & SWAP_FLAG_PRIVATE)
+		flags |= SWAP_FLAG_PRIVATE;
+
 	if (ctl->verbose)
 		printf(_("swapon %s\n"), dev.path);
 
@@ -928,6 +931,8 @@ int main(int argc, char *argv[])
 					ctl.props.discard |= SWAP_FLAG_DISCARD_ONCE;
 				else if (strcmp(optarg, "pages") == 0)
 					ctl.props.discard |= SWAP_FLAG_DISCARD_PAGES;
+				else if (strcmp(optarg, "private") == 0)
+					ctl.props.discard |= SWAP_FLAG_PRIVATE;
 				else
 					errx(EXIT_FAILURE, _("unsupported discard policy: %s"), optarg);
 			}
