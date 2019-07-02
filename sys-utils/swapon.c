@@ -703,7 +703,7 @@ static int parse_options(struct swap_prop *props, const char *options)
 	assert(props);
 	assert(options);
 
-	if (mnt_optstr_get_option(options, "private", NULL, NULL) == 0)
+	if (mnt_optstr_get_option(options, "cgroup", NULL, NULL) == 0)
 		props->private = 1;
 
 	if (mnt_optstr_get_option(options, "nofail", NULL, NULL) == 0)
